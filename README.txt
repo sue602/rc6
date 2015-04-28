@@ -13,7 +13,7 @@ AFAIK, this algorithm is patented and requires a license for commercial
 purposes.
 
 I should acknowledge that I found work by Drizz[1] to be very helpful 
-here and I was influenced by his key setup routine.
+here and was influenced by his key setup routine.
 
 The code is public domain, feel free to do with as you wish. 
 
