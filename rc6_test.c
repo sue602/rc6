@@ -4,7 +4,6 @@
 
 #include "rc6.h"
 
-
 char *test_keys[] = 
 { "00000000000000000000000000000000",
   "0123456789abcdef0112233445566778",
@@ -60,25 +59,26 @@ size_t hex2bin (void *bin, char hex[]) {
 void run_tests (void)
 {
   size_t i, plen, clen, klen;
-  uint8_t p[32], c1[32], c2[32], k[32];
+  uint8_t p1[32], p2[32], c1[32], c2[32], k[32];
   RC6_KEY rc6_key;
   
   for (i=0; i<sizeof (test_keys)/sizeof(char*); i++)
   {
-    memset (p, 0, sizeof (p));
+    memset (p1, 0, sizeof (p1));
+    memset (p2, 0, sizeof (p2));
     memset (c1, 0, sizeof (c1));
     memset (c2, 0, sizeof (c2));
     memset (k, 0, sizeof (k));
     
     klen=hex2bin (k, test_keys[i]);
     clen=hex2bin (c1, test_ciphertexts[i]);
-    plen=hex2bin (p, test_plaintexts[i]);
+    plen=hex2bin (p1, test_plaintexts[i]);
     
-    rc6_set_key (&rc6_key, k, klen);
-    //rc6_setkey (&rc6_key, k);
-    rc6_encrypt (&rc6_key, p, c2);
+    rc6_setkey (&rc6_key, k, klen);
+    rc6_encrypt (&rc6_key, p1, c2);
+    rc6_decrypt (&rc6_key, c2, p2);
     
-    if (memcmp (c1, c2, clen)==0) {
+    if (memcmp (p1, p2, plen)==0) {
       printf ("\nPassed test #%i", (i+1));
     } else {
       printf ("\nFailed test #%i", (i+1));
