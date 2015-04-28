@@ -48,16 +48,16 @@ init_key:
     
     .repeat
       ; A = key->S[i] = ROTL(key->S[i] + A+B, 3); 
-	    add    eax, ebx
-	    add    eax, [esi][RC6_KEY.S][4*edi]
-	    rol    eax, 3
-	    lea    ecx, [eax+ebx]
-	    mov    [esi][RC6_KEY.S][4*edi], eax
+      add    eax, ebx
+      add    eax, [esi][RC6_KEY.S][4*edi]
+      rol    eax, 3
+      lea    ecx, [eax+ebx]
+      mov    [esi][RC6_KEY.S][4*edi], eax
       ; B = L[j] = ROTL(L[j] + A+B, A+B);
-	    add    ebx, eax
-	    add    ebx, [esp+4*edx]
-	    rol    ebx, cl
-	    mov    [esp+4*edx], ebx
+      add    ebx, eax
+      add    ebx, [esp+4*edx]
+      rol    ebx, cl
+      mov    [esp+4*edx], ebx
   
       ; i++
       inc    edi          

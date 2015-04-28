@@ -1,9 +1,6 @@
 
 #include "rc6.h"
 
-#define ROTL(a, b) (((a) << (b)) | ((a) >> (32 - (b))))
-#define ROTR(a, b) (((a) >> (b)) | ((a) << (32 - (b))))
-
 void rc6_set_key (RC6_KEY *key, uint8_t *K, size_t keylen)
 {  
   uint32_t i, j, k, A, B, T, L[8], *kptr=(uint32_t*)K; 
