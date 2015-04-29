@@ -7,7 +7,7 @@
 
 void rc6_setkey (RC6_KEY *key, uint8_t *K, size_t keylen)
 {  
-  uint32_t i, j, k, A, B, T, L[8], *kptr=(uint32_t*)K; 
+  uint32_t i, j, k, A, B, L[8], *kptr=(uint32_t*)K; 
   
   // initialize L with key
   for (i=0; i<keylen/4; i++) {

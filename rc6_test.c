@@ -1,6 +1,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 #include "rc6.h"
 
@@ -86,7 +87,7 @@ void run_tests (void)
   }
 }
 
-int main (int argc, char *argv[])
+int main (void)
 {
   run_tests();
   return 0;
