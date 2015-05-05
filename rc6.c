@@ -97,7 +97,7 @@ void rc6_decrypt(RC6_KEY *key, void *input, void *output)
   B=in[1];
   C=in[2];
   D=in[3];
-   
+  
   // sub last 2 words in key
   C -= key->x[43];
   A -= key->x[42];

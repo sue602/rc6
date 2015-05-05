@@ -24,7 +24,7 @@ char *test_plaintexts[] =
   "02132435465768798a9bacbdcedfe0f1",
   "00000000000000000000000000000000",
   "02132435465768798a9bacbdcedfe0f1" };
-            
+
 char *test_ciphertexts[] =
 { "8fc3a53656b1f778c129df4e9848a41e",
   "524e192f4715c6231f51f6367ea43f18",
@@ -32,7 +32,7 @@ char *test_ciphertexts[] =
   "688329d019e505041e52e92af95291d4",
   "8f5fbd0510d15fa893fa3fda6e857ec2",
   "c8241816f0d7e48920ad16a1674e5d48"};
-  
+
 size_t hex2bin (void *bin, char hex[]) {
   size_t len, i;
   int x;

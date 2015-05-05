@@ -24,9 +24,9 @@ typedef struct _RC6_KEY {
 {
 #endif
 
-void rc6_setkey (RC6_KEY*, uint8_t*, size_t);
-void rc6_encrypt (RC6_KEY*, void*, void*);
-void rc6_decrypt (RC6_KEY*, void*, void*);
+  void rc6_setkey (RC6_KEY*, uint8_t*, size_t);
+  void rc6_encrypt (RC6_KEY*, void*, void*);
+  void rc6_decrypt (RC6_KEY*, void*, void*);
 
 #ifdef __cplusplus
 }
