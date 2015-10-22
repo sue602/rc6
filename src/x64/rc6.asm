@@ -4,7 +4,7 @@
 ; Odzhan
 
 ifdef __JWASM__
-.686
+.x64
 .model flat
 endif
 
