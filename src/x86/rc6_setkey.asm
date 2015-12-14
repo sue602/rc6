@@ -26,10 +26,12 @@ rc6_setkey proc
     sub    esp, ecx
     mov    edi, esp
     
-    shr    ecx, 2              ; /= 4
-    push   ecx                 ; save keylen/4
+    ;shr    ecx, 2              ; /= 4
+    mov    eax, ecx
+    shr    eax, 2
+    push   eax                 ; save keylen/4
     ; copy key to local buffer
-    rep    movsd
+    rep    movsb
 
     mov    eax, RC6_P
     mov    esi, edx
@@ -77,8 +79,7 @@ init_key:
     .until zero?
     
     pop    ecx
-    shl    ecx, 2
-    add    esp, ecx
+    lea    esp, [esp+4*ecx]
     popad
     ret
 rc6_setkey endp

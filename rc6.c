@@ -27,8 +27,8 @@ void rc6_setkey (RC6_KEY *key, uint8_t *K, size_t keylen)
   // mix with key
   for (; k < RC6_KR*3; k++)
   { 
-    A = key->x[i] = ROTL(key->x[i] + A+B, 3);  
-    B = L[j]      = ROTL(L[j] + A+B, A+B);
+    A = key->x[i] = ROTL32(key->x[i] + A+B, 3);  
+    B = L[j]      = ROTL32(L[j] + A+B, A+B);
     
     i++;
     i %= RC6_KR;
@@ -38,91 +38,71 @@ void rc6_setkey (RC6_KEY *key, uint8_t *K, size_t keylen)
   } 
 }
 
-void rc6_encrypt (RC6_KEY *key, void* input, void* output)
+void rc6_crypt (RC6_KEY *key, void *input, void *output, int enc)
 {
-  uint32_t  A, B, C, D, t, u, i;
-  uint32_t *in, *out, *k;
+  rc6_blk *in, *out;
+  uint32_t A, B, C, D, T0, T1, i;
+  uint32_t *k=(uint32_t*)key->x;
   
-  in  = (uint32_t*)input;
-  out = (uint32_t*)output;
-  k   = (uint32_t*)key->x;
+  in =(rc6_blk*)input;
+  out=(rc6_blk*)output;
   
-  // load plaintext
-  A=in[0];
-  B=in[1];
-  C=in[2];
-  D=in[3];
+  // load plaintext/ciphertext
+  A=in->v32[0];
+  B=in->v32[1];
+  C=in->v32[2];
+  D=in->v32[3];
   
-  // add first 2 words in key
-  B += *k++;
-  D += *k++;
-  
-  // for number of rounds
-  for (i=0; i<RC6_ROUNDS; i++) {
-    t = ROTL(B * (2 * B + 1), 5);
-    u = ROTL(D * (2 * D + 1), 5);
-    A = ROTL(A ^ t, u) + *k++;
-    C = ROTL(C ^ u, t) + *k++;
-    // swap
-    t=A;
-    A=B;
-    B=C;
-    C=D;
-    D=t;
+  if (enc==RC6_ENCRYPT)
+  {
+    B += *k; k++;
+    D += *k; k++;
+  } else {
+    k += 43;
+    C -= *k; k--;
+    A -= *k; k--;
   }
   
-  // add last 2 words in key
-  A += *k++;
-  C += *k++;
-  
-  // save
-  out[0]=A;
-  out[1]=B;
-  out[2]=C;
-  out[3]=D;
-}
-
-void rc6_decrypt(RC6_KEY *key, void *input, void *output)
-{   
-  uint32_t A, B, C, D, t, u, i, j;
-  uint32_t *in, *out, *k;
-
-  in  = (uint32_t*)input;
-  out = (uint32_t*)output;
-  k   = (uint32_t*)&key->x[RC6_KR];
-  j   = RC6_KR - 4;
-  
-  // load ciphertext
-  A=in[0];
-  B=in[1];
-  C=in[2];
-  D=in[3];
-  
-  // sub last 2 words in key
-  C -= key->x[43];
-  A -= key->x[42];
-
-  // for each round
-  for (i=RC6_ROUNDS; i>0; i--, j -= 2) {
-    t = ROTL(A * (2 * A + 1), 5);
-    u = ROTL(C * (2 * C + 1), 5);            
-    B = ROTR(B - key->x[j+1], t) ^ u;
-    D = ROTR(D - key->x[j], u) ^ t;
-    // swap
-    t=D;
-    D=C;
-    C=B;
-    B=A;
-    A=t;
+  for (i=0; i<RC6_ROUNDS; i++)
+  {
+    if (enc==RC6_ENCRYPT)
+    {
+      T0 = ROTL32(B * (2 * B + 1), 5);
+      T1 = ROTL32(D * (2 * D + 1), 5);
+      A = ROTL32(A ^ T0, T1) + *k; k++;
+      C = ROTL32(C ^ T1, T0) + *k; k++;
+      // swap
+      T0 = A;
+      A  = B;
+      B  = C;
+      C  = D;
+      D  = T0;
+    } else {
+      T0 = ROTL32(A * (2 * A + 1), 5);
+      T1 = ROTL32(C * (2 * C + 1), 5);            
+      B  = ROTR32(B - *k, T0) ^ T1; k--;
+      D  = ROTR32(D - *k, T1) ^ T0; k--;
+      // swap
+      T0 = D;
+      D  = C;
+      C  = B;
+      B  = A;
+      A  = T0;
+    }
   }
   
-  // sub first 2 words
-  D -= key->x[1];
-  B -= key->x[0];
-
-  // save
-  out[0]=A;
-  out[1]=B;
-  out[2]=C;
-  out[3]=D;
+  // swap
+  if (enc==RC6_ENCRYPT)
+  {
+    A += *k; k++;
+    C += *k; k++;
+  } else {
+    D -= *k; k--;
+    B -= *k; k--;
+  }
+  // save plaintext/ciphertext
+  out->v32[0]=A;
+  out->v32[1]=B;
+  out->v32[2]=C;
+  out->v32[3]=D;
 }
