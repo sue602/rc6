@@ -247,9 +247,9 @@ r6c_l6:
     ; out[1] -= key->x[0];
     scasd
     sub    B, [edi]
+    cld
     
 r6c_l7:
-    cld
     ; save ciphertext
     mov    edi, [esp+32+12] ; output
     xchg   eax, A
