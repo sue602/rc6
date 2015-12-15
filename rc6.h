@@ -53,11 +53,18 @@ typedef union _rc6_blk_t {
 {
 #endif
 
-  void rc6_setkey (RC6_KEY*, uint8_t*, size_t);
+  void rc6_setkey (RC6_KEY*, void*, uint32_t);
+  void rc6_setkeyx (RC6_KEY*, void*, uint32_t);
   void rc6_crypt (RC6_KEY*, void*, void*, int);
+  void rc6_cryptx (RC6_KEY*, void*, void*, int);
 
 #ifdef __cplusplus
 }
+#endif
+
+#ifdef USE_ASM
+#define rc6_setkey(x, y, z) rc6_setkeyx (x, y, z)
+#define rc6_crypt(w, x, y, z) rc6_cryptx (w, x, y, z)
 #endif
 
 #endif

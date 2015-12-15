@@ -10,7 +10,7 @@ INCLUDELIB LIBCMT
 INCLUDELIB OLDNAMES
 
 PUBLIC	_rc6_setkey
-; Function compile flags: /Ogspy
+; Function compile flags: /Ogsp
 ;	COMDAT _rc6_setkey
 _TEXT	SEGMENT
 _L$ = -36						; size = 32
@@ -101,7 +101,7 @@ $LL18@rc6_setkey:
 _rc6_setkey ENDP
 _TEXT	ENDS
 PUBLIC	_rc6_crypt
-; Function compile flags: /Ogspy
+; Function compile flags: /Ogsp
 ;	COMDAT _rc6_crypt
 _TEXT	SEGMENT
 tv243 = -8						; size = 4
@@ -162,9 +162,9 @@ $LL7@rc6_crypt:
 	imul	eax, ecx
 	rol	esi, 5
 	rol	eax, 5
-; Line 72
-	mov	ecx, eax
 ; Line 73
+	mov	ecx, eax
+; Line 74
 	xor	eax, DWORD PTR _C$[ebp]
 	mov	DWORD PTR tv71[ebp], esi
 	xor	DWORD PTR tv71[ebp], ebx
@@ -173,23 +173,23 @@ $LL7@rc6_crypt:
 	mov	ecx, esi
 	add	ebx, DWORD PTR [edx]
 	rol	eax, cl
-; Line 75
-	mov	ecx, ebx
 ; Line 76
+	mov	ecx, ebx
+; Line 77
 	mov	ebx, edi
 	add	eax, DWORD PTR [edx+4]
 	add	edx, 8
-; Line 77
-	mov	edi, eax
 ; Line 78
+	mov	edi, eax
+; Line 79
 	mov	eax, DWORD PTR _D$[ebp]
 	mov	DWORD PTR _C$[ebp], eax
-; Line 79
-	mov	DWORD PTR _D$[ebp], ecx
 ; Line 80
+	mov	DWORD PTR _D$[ebp], ecx
+; Line 81
 	jmp	SHORT $LN6@rc6_crypt
 $LN4@rc6_crypt:
-; Line 83
+; Line 85
 	sub	edi, DWORD PTR [edx]
 	lea	esi, DWORD PTR [esi+esi+1]
 	imul	esi, DWORD PTR _C$[ebp]
@@ -201,7 +201,7 @@ $LN4@rc6_crypt:
 	pop	ecx
 	sub	ecx, eax
 	rol	edi, cl
-; Line 84
+; Line 86
 	push	32					; 00000020H
 	pop	ecx
 	sub	ecx, esi
@@ -210,51 +210,51 @@ $LN4@rc6_crypt:
 	sub	esi, DWORD PTR [edx-4]
 	rol	esi, cl
 	xor	esi, eax
-; Line 87
-	mov	eax, DWORD PTR _C$[ebp]
-; Line 88
-	mov	DWORD PTR _C$[ebp], edi
 ; Line 89
+	mov	eax, DWORD PTR _C$[ebp]
+; Line 90
+	mov	DWORD PTR _C$[ebp], edi
+; Line 91
 	mov	edi, ebx
 	sub	edx, 8
 	mov	DWORD PTR _D$[ebp], eax
-; Line 90
+; Line 92
 	mov	ebx, esi
 $LN6@rc6_crypt:
-; Line 98
+; Line 99
 	dec	DWORD PTR tv243[ebp]
 	mov	esi, DWORD PTR _C$[ebp]
-; Line 99
+; Line 100
 	mov	ecx, DWORD PTR _D$[ebp]
 	jne	$LL7@rc6_crypt
-; Line 95
+; Line 96
 	cmp	DWORD PTR _enc$[ebp], 1
 	jne	SHORT $LN2@rc6_crypt
-; Line 97
-	add	ebx, DWORD PTR [edx]
 ; Line 98
-	add	esi, DWORD PTR [edx+4]
+	add	ebx, DWORD PTR [edx]
 ; Line 99
+	add	esi, DWORD PTR [edx+4]
+; Line 100
 	jmp	SHORT $LN1@rc6_crypt
 $LN2@rc6_crypt:
-; Line 100
-	sub	ecx, DWORD PTR [edx]
 ; Line 101
+	sub	ecx, DWORD PTR [edx]
+; Line 102
 	sub	edi, DWORD PTR [edx-4]
 $LN1@rc6_crypt:
-; Line 104
-	mov	eax, DWORD PTR _output$[ebp]
 ; Line 105
+	mov	eax, DWORD PTR _output$[ebp]
+; Line 106
 	mov	DWORD PTR [eax+4], edi
 	pop	edi
-; Line 106
+; Line 107
 	mov	DWORD PTR [eax+8], esi
 	pop	esi
 	mov	DWORD PTR [eax], ebx
-; Line 107
+; Line 108
 	mov	DWORD PTR [eax+12], ecx
 	pop	ebx
-; Line 108
+; Line 109
 	leave
 	ret	0
 _rc6_crypt ENDP
