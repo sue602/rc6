@@ -1,8 +1,8 @@
 
 
 ; RC6 in x86 assembly
-; 293 bytes
-; Odzhan
+; 271 bytes
+; Odzhan and Peter Ferrie
 
     bits 32
   
@@ -23,9 +23,14 @@ endstruc
 _rc6_setkeyx:
 rc6_setkey:
     pushad
-    mov    edx, [esp+32+ 4]    ; rc6key
-    mov    esi, [esp+32+ 8]    ; key
-    mov    ecx, [esp+32+12]    ; keylen
+    lea    esi, [esp+32+ 4]
+    lodsd
+    xchg   edx, eax            ; rc6key
+    lodsd
+    xchg   ecx, eax
+    lodsd
+    xchg   ecx, eax            ; keylen
+    xchg   esi, eax            ; key
     ; should check key length?
     ; we assume it's multiple of 4
     ; something else would mess up stack
@@ -40,31 +45,30 @@ rc6_setkey:
     mov    eax, RC6_P
     mov    esi, edx
     mov    edi, edx
-    push   RC6_KR
-    pop    ecx
+    mov    cl, RC6_KR
 init_key:
     stosd
     add    eax, RC6_Q
     loop   init_key
     
-    xor    eax, eax    ; A=0
-    xor    ebx, ebx    ; B=0
-    xor    ebp, ebp    ; k=0
+    xor    ebp, ebp    ; B=0
     xor    edi, edi    ; i=0
-    xor    edx, edx    ; j=0
-    
+    xchg   ecx, eax    ; A=0
+    cdq                ; j=0
+    mov    bl, (-RC6_KR*3) & 255
+
 sk_l1:
     ; A = key->S[i] = ROTL(key->S[i] + A+B, 3); 
-    add    eax, ebx
-    add    eax, [esi+4*edi]
+    add    eax, ebp
+    add    eax, [esi+edi*4]
     rol    eax, 3
-    lea    ecx, [eax+ebx]
-    mov    [esi+4*edi], eax
+    mov    [esi+edi*4], eax
     ; B = L[j] = ROTL(L[j] + A+B, A+B);
-    add    ebx, eax
-    add    ebx, [esp+4*edx+4]
-    rol    ebx, cl
-    mov    [esp+4*edx+4], ebx
+    add    ebp, eax
+    mov    ecx, ebp
+    add    ebp, [esp+4*edx+4]
+    rol    ebp, cl
+    mov    [esp+4*edx+4], ebp
 
     ; i++
     inc    edi          
@@ -79,8 +83,8 @@ sk_l1:
     cmp    edx, [esp]
     sbb    ecx, ecx
     and    edx, ecx
-    inc    ebp
-    cmp    ebp, RC6_KR*3
+
+    inc    bl
     jnz    sk_l1
       
     pop    ecx
@@ -103,14 +107,14 @@ rc6_crypt:
     
     ; load ciphertext
     lodsd
-    xchg   eax, ecx
+    xchg   eax, D
     lodsd
     xchg   eax, B
     lodsd
     xchg   eax, C
     lodsd
     xchg   eax, D
-    xchg   ecx, A
+    xchg   eax, A
     
     mov    ecx, [esp+32+16] ; enc
     jecxz  r6c_l1
@@ -139,8 +143,7 @@ r6c_l2:
 r6c_l3:
     push   eax
     push   ecx
-    dec    ecx
-    js     r6c_l4
+    loop   r6c_l4
     
     ; T0 = ROTL(B * (2 * B + 1), 5);
     lea    eax, [B+B+1]
@@ -162,11 +165,11 @@ r6c_l3:
     add    C, [edi]  ; key->x[i+1]
     scasd
     ; swap
-    mov    eax, A
-    mov    A, B
-    mov    B, C
-    mov    C, D
-    mov    D, eax
+    xchg   D, eax
+    xchg   C, eax
+    xchg   B, eax
+    xchg   A, eax
+    xchg   D, eax
     jmp    r6c_l5
 r6c_l4:    
     ; t = ROTL(A * (2 * A + 1), 5);
@@ -189,11 +192,11 @@ r6c_l4:
     ror    D, cl   ; u
     xor    D, eax  ; t
     ; swap
-    mov    eax, D
-    mov    D, C
-    mov    C, B
-    mov    B, A
-    mov    A, eax 
+    xchg   A, eax
+    xchg   B, eax
+    xchg   C, eax
+    xchg   D, eax
+    xchg   A, eax
 r6c_l5:
     ; decrease counter
     pop    ecx
