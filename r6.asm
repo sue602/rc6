@@ -33,7 +33,7 @@
 ;
 ; https://people.csail.mit.edu/rivest/pubs/RRSY98.pdf
 ;
-; size: 271 bytes
+; size: 269 bytes
 ;
 ; global calls use cdecl convention
 ;
@@ -151,6 +151,8 @@ rc6_crypt:
     xchg   eax, D
     xchg   eax, A
     
+    push   RC6_ROUNDS
+    pop    eax
     mov    ecx, [esp+32+16] ; enc
     jecxz  r6c_l1
     
@@ -163,7 +165,7 @@ rc6_crypt:
     jmp    r6c_l2
 r6c_l1:
     ; move to end of key
-    add    edi, (RC6_KR*4) - 4
+    lea    edi, [edi+eax*8+12]
     ; load backwards
     std
     
@@ -173,8 +175,6 @@ r6c_l1:
     scasd
     sub    A, [edi]
 r6c_l2:
-    push   RC6_ROUNDS
-    pop    eax
 r6c_l3:
     push   eax
     push   ecx
