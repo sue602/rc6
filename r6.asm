@@ -235,9 +235,8 @@ r6c_l5:
     jecxz  r6c_l6
     ; out[0] += key->x[42];
     add    A, [edi]
-    scasd
     ; out[2] += key->x[43];
-    add    C, [edi]
+    add    C, [edi+4]
     jmp    r6c_l7
 r6c_l6:
     xchg   D, A
@@ -245,8 +244,7 @@ r6c_l6:
     ; out[3] -= key->x[1];
     sub    D, [edi]
     ; out[1] -= key->x[0];
-    scasd
-    sub    B, [edi]
+    sub    B, [edi-4]
     cld
     
 r6c_l7:
