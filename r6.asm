@@ -33,7 +33,7 @@
 ;
 ; https://people.csail.mit.edu/rivest/pubs/RRSY98.pdf
 ;
-; size: 269 bytes
+; size: 252 bytes
 ;
 ; global calls use cdecl convention
 ;
@@ -161,8 +161,8 @@ rc6_crypt:
     scasd
     ; D += key->x[1];
     add    D, [edi]
-    scasd
     jmp    r6c_l2
+
 r6c_l1:
     ; move to end of key
     lea    edi, [edi+eax*8+12]
@@ -174,11 +174,16 @@ r6c_l1:
     ; A -= key->x[42];
     scasd
     sub    A, [edi]
+    xchg   D, A
+    xchg   C, B
+
 r6c_l2:
+    scasd
 r6c_l3:
     push   eax
     push   ecx
-    loop   r6c_l4
+    dec    ecx
+    pushfd
     
     ; T0 = ROTL(B * (2 * B + 1), 5);
     lea    eax, [B+B+1]
@@ -188,6 +193,9 @@ r6c_l3:
     lea    ecx, [D+D+1]
     imul   ecx, D
     rol    ecx, 5
+    popfd
+    jnz    r6c_l4
+
     ; A = ROTL(A ^ T0, T1) + key->x[i];
     xor    A, eax
     rol    A, cl
@@ -198,41 +206,26 @@ r6c_l3:
     xchg   eax, ecx
     rol    C, cl
     add    C, [edi]  ; key->x[i+1]
-    scasd
-    ; swap
-    xchg   D, eax
-    xchg   C, eax
-    xchg   B, eax
-    xchg   A, eax
-    xchg   D, eax
     jmp    r6c_l5
 r6c_l4:    
-    ; t = ROTL(A * (2 * A + 1), 5);
-    lea    ecx, [A+A+1]
-    imul   ecx, A
-    rol    ecx, 5
-    ; u = ROTL(C * (2 * C + 1), 5);
-    lea    eax, [C+C+1]
-    imul   eax, C
-    rol    eax, 5
     ; B = ROTR(B - key->x[i + 1], t) ^ u;
+    sub    C, [edi]
     scasd
-    sub    B, [edi]
-    ror    B, cl   ; t
-    xor    B, eax  ; u
+    ror    C, cl   ; t
+    xor    C, eax  ; u
     ; D = ROTR(D - key->x[i], u) ^ t;
     xchg   eax, ecx ; swap u and t
-    scasd
-    sub    D, [edi]
-    ror    D, cl   ; u
-    xor    D, eax  ; t
-    ; swap
-    xchg   A, eax
-    xchg   B, eax
-    xchg   C, eax
-    xchg   D, eax
-    xchg   A, eax
+    sub    A, [edi]
+    ror    A, cl   ; u
+    xor    A, eax  ; t
 r6c_l5:
+    scasd
+    ; swap
+    xchg   D, eax
+    xchg   C, eax
+    xchg   B, eax
+    xchg   A, eax
+    xchg   D, eax
     ; decrease counter
     pop    ecx
     pop    eax
@@ -242,23 +235,22 @@ r6c_l5:
     jecxz  r6c_l6
     ; out[0] += key->x[42];
     add    A, [edi]
-    scasd
     ; out[2] += key->x[43];
-    add    C, [edi]
+    add    C, [edi+4]
     jmp    r6c_l7
 r6c_l6:
+    xchg   D, A
+    xchg   C, B
     ; out[3] -= key->x[1];
-    scasd
     sub    D, [edi]
     ; out[1] -= key->x[0];
-    scasd
-    sub    B, [edi]
+    sub    B, [edi-4]
+    cld
     
 r6c_l7:
-    cld
     ; save ciphertext
     mov    edi, [esp+32+12] ; output
-    mov    eax, A
+    xchg   eax, A
     stosd
     xchg   eax, B
     stosd
