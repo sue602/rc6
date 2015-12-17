@@ -33,7 +33,7 @@
 ;
 ; https://people.csail.mit.edu/rivest/pubs/RRSY98.pdf
 ;
-; size: 252 bytes
+; size: 247 bytes
 ;
 ; global calls use cdecl convention
 ;
@@ -73,7 +73,7 @@ rc6_setkey:
     mov    edi, esp
     
     shr    ecx, 2              ; /= 4
-    push   ecx                 ; save keylen/4
+    mov    ebx, ecx            ; save keylen/4
     ; copy key to local buffer
     rep    movsd
 
@@ -86,45 +86,45 @@ init_key:
     add    eax, RC6_Q
     loop   init_key
     
-    xor    ebp, ebp    ; B=0
     xor    edi, edi    ; i=0
+    xor    ebp, ebp    ; j=0
     xchg   ecx, eax    ; A=0
-    cdq                ; j=0
-    mov    bl, (-RC6_KR*3) & 255
+    cdq                ; B=0
+    mov    ch, (-RC6_KR*3) & 255
 
 sk_l1:
     ; A = key->S[i] = ROTL(key->S[i] + A+B, 3); 
-    add    eax, ebp
+    add    eax, edx
     add    eax, [esi+edi*4]
     rol    eax, 3
     mov    [esi+edi*4], eax
     ; B = L[j] = ROTL(L[j] + A+B, A+B);
-    add    ebp, eax
-    mov    ecx, ebp
-    add    ebp, [esp+4*edx+4]
-    rol    ebp, cl
-    mov    [esp+4*edx+4], ebp
+    add    edx, eax
+    mov    cl, dl
+    add    edx, [esp+4*ebp]
+    rol    edx, cl
+    mov    [esp+4*ebp], edx
 
     ; i++
     inc    edi          
     ; i %= (RC6_ROUNDS*2)+4
     cmp    edi, RC6_KR  
-    sbb    ecx, ecx
-    and    edi, ecx
-    
-    ; j++
-    inc    edx       
-    ; j %= RC6_KEYLEN/4
-    cmp    edx, [esp]
-    sbb    ecx, ecx
-    and    edx, ecx
+    jb     sk_l2
+    xor    edi, edi
 
-    inc    bl
+sk_l2:    
+    ; j++
+    inc    ebp       
+    ; j %= RC6_KEYLEN/4
+    cmp    ebp, ebx
+    jb     sk_l3
+    xor    ebp, ebp
+
+sk_l3:
+    inc    ch
     jnz    sk_l1
       
-    pop    ecx
-    shl    ecx, 2
-    add    esp, ecx
+    lea    esp, [esp+ebx*4]
     popad
     ret
 
